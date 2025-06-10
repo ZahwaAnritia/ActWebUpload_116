@@ -19,7 +19,7 @@ Berikut adalah dokumentasi visual.
 ![Hasil Hapus](images/hasil4.png)
 
 ### 5. Hasil Unggah
-![Hasil Unduh](images/hasil5.png)
+![Hasil Unduh](images/hasil51.png)
 
 ### 6. Hasil Unduh
 ![Preview File](images/hasil6.png)
