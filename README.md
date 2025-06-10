@@ -23,6 +23,8 @@ Berikut adalah dokumentasi visual.
 
 ### 6. Hasil Unduh
 ![Preview File](images/hasil6.png)
+![Preview File](images/hasil9.png)
 
 ### 7. Hasil Delete
 ![Hasil Unggah](images/hasil7.png)
+![Hasil Unggah](images/hasil8.png)
