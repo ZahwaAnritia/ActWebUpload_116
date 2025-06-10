@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Unggah File</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+        }
+        .container { max-width: 600px; }
+        .card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-radius: 12px;
+        }
+        .preview-area {
+            border: 2px dashed #20c997;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+        .preview-area img {
+            max-width: 100%;
+            max-height: 300px;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+        .pdf-preview {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            overflow-y: auto;
+            margin: 10px auto;
+            padding: 10px;
+            text-align: left;
+        }
+        .pdf-preview iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .file-icon {
+            font-size: 48px;
+            color: #adb5bd;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background-color: #20c997;
+            border-color: #20c997;
+        }
+        .btn-primary:hover {
+            background-color: #198754;
+            border-color: #198754;
+        }
+
+        
+        .btn-primary:focus, .btn-primary:active {
+            background-color: #198754 !important;
+            border-color: #198754 !important;
+            box-shadow: 0 0 0 0.25rem rgba(32, 201, 151, 0.5) !important;
+        }
+    </style>
+</head>
+<body>
+
+
+
+<div class="container">
+    <div class="card p-4">
+        <h2 class="card-title text-center mb-4">Unggah File Anda</h2>
+        <form id="uploadForm">
+            <div class="mb-3">
+                <label for="fileToUpload" class="form-label">Pilih file untuk diunggah:</label>
+                <input type="file" name="fileToUpload" id="fileToUpload" class="form-control" accept="image/*,.pdf">
+            </div>
+            <div class="preview-area mb-3" id="previewArea" style="display: none;">
+                <div id="fileIconPreview" class="file-icon" style="display: none;">
+                    <i class="bi bi-file-earmark"></i>
+                </div>
+                <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
+                <div id="pdfPreview" class="pdf-preview" style="display: none;"></div>
+                <p id="fileNamePreview" class="mb-1 fw-bold"></p>
+                <p id="fileSizePreview" class="text-muted small"></p>
+                <p id="fileTypePreview" class="text-muted small"></p>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Unggah File</button>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="list_files.php" class="btn btn-outline-secondary">Lihat Daftar File</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfobject@2.2.12/pdfobject.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<script>
+    const fileInput = document.getElementById('fileToUpload');
+    const previewArea = document.getElementById('previewArea');
+    const imagePreview = document.getElementById('imagePreview');
+    const pdfPreview = document.getElementById('pdfPreview');
+    const fileIconPreview = document.getElementById('fileIconPreview');
+    const fileNamePreview = document.getElementById('fileNamePreview');
+    const fileSizePreview = document.getElementById('fileSizePreview');
+    const fileTypePreview = document.getElementById('fileTypePreview');
+
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            previewArea.style.display = 'block';
+            fileNamePreview.textContent = file.name;
+            fileSizePreview.textContent = `Ukuran: ${(file.size / 1024).toFixed(2)} KB`;
+            fileTypePreview.textContent = `Tipe: ${file.type}`;
+
+            imagePreview.style.display = 'none';
+            pdfPreview.style.display = 'none';
+            fileIconPreview.style.display = 'none';
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else if (file.type === 'application/pdf') {
+                fileIconPreview.innerHTML = '<i class="bi bi-file-earmark-pdf"></i>';
+                fileIconPreview.style.display = 'block';
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    pdfPreview.innerHTML = '';
+                    PDFObject.embed(e.target.result, pdfPreview, {
+                        pdfOpenParams: {
+                            view: 'FitH', scrollbar: '1', toolbar: '0',
+                            statusbar: '0', messages: '0', navpanes: '0'
+                        }
+                    });
+                    pdfPreview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                let iconClass = 'bi-file-earmark';
+                if (file.type.includes('word')) iconClass = 'bi-file-earmark-word';
+                else if (file.type.includes('excel')) iconClass = 'bi-file-earmark-excel';
+                else if (file.type.includes('powerpoint')) iconClass = 'bi-file-earmark-ppt';
+                else if (file.type.includes('zip')) iconClass = 'bi-file-earmark-zip';
+                
+                fileIconPreview.innerHTML = `<i class="bi ${iconClass}"></i>`;
+                fileIconPreview.style.display = 'block';
+            }
+        } else {
+            previewArea.style.display = 'none';
+        }
+    });
+
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        if (!fileInput.files[0]) {
+            Swal.fire({
+                title: 'Peringatan', 
+                text: 'Silakan pilih file terlebih dahulu.', 
+                icon: 'warning',
+                confirmButtonColor: '#20c997'
+            });
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Mengunggah...',
+            text: 'Mohon tunggu.',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+        
+        fetch('upload.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: result.message,
+                    confirmButtonColor: '#20c997'
+                }).then(() => {
+                    window.location.href = 'list_files.php';
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: result.message,
+                    confirmButtonColor: '#d33'
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                title: 'Error', 
+                text: 'Terjadi kesalahan: ' + error, 
+                icon: 'error',
+                confirmButtonColor: '#d33'
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
